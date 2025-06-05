@@ -1,3 +1,19 @@
+    # Importing packages
+import math
+import os
+import time
+from importlib.resources import files
+
+import matplotlib.path as mpltPath
+import numpy as np
+import pandas as pd
+import PyCO2SYS as pyco2
+import scipy.interpolate
+import seawater as sw
+from scipy.interpolate import griddata
+from scipy.io import loadmat
+from scipy.spatial import Delaunay
+
 def PyESPER_LIR(DesiredVariables, Path, OutputCoordinates={}, PredictorMeasurements={}, **kwargs):
     
     """
@@ -180,20 +196,7 @@ def PyESPER_LIR(DesiredVariables, Path, OutputCoordinates={}, PredictorMeasureme
     ************************************************************************* 
     """
 
-     # Importing packages
-    import math
-    import os
-    import time
 
-    import matplotlib.path as mpltPath
-    import numpy as np
-    import pandas as pd
-    import PyCO2SYS as pyco2
-    import scipy.interpolate
-    import seawater as sw
-    from scipy.interpolate import griddata
-    from scipy.io import loadmat
-    from scipy.spatial import Delaunay
 
      # Starting the timer
     tic = time.perf_counter() 
@@ -275,7 +278,8 @@ def PyESPER_LIR(DesiredVariables, Path, OutputCoordinates={}, PredictorMeasureme
                 result = np.array([i * default_factor for i in PredictorMeasurements[param.replace('_u', '')]])
                 dresult = result
             else:
-                result = np.tile('nan', n)
+                #result = np.tile('nan', n)
+                result = np.tile(np.nan, n)
                 dresult = np.tile(0, n)
         return result, dresult
 
@@ -299,7 +303,8 @@ def PyESPER_LIR(DesiredVariables, Path, OutputCoordinates={}, PredictorMeasureme
     sal_defu = np.tile(0.003, n)
 
     # Temperature uncertainties
-    temp_u = np.tile(np.array(MeasUncerts.get("temp_u", [0.003])), n) if "temp_u" in MeasUncerts or "temperature" in PredictorMeasurements else np.tile("nan", n)
+    #temp_u = np.tile(np.array(MeasUncerts.get("temp_u", [0.003])), n) if "temp_u" in MeasUncerts or "temperature" in PredictorMeasurements else np.tile("nan", n)
+    temp_u = np.tile(np.array(MeasUncerts.get("temp_u", [0.003])), n) if "temp_u" in MeasUncerts or "temperature" in PredictorMeasurements else np.tile(np.nan, n)
     temp_defu = np.tile(0.003 if "temp_u" in MeasUncerts or "temperature" in PredictorMeasurements else 0, n)
 
     # Process other parameters
@@ -315,6 +320,7 @@ def PyESPER_LIR(DesiredVariables, Path, OutputCoordinates={}, PredictorMeasureme
             param, factor, PredictorMeasurements, n
         )
 
+    
     # Update MeasUncerts and DefaultUAll dictionaries
     meas_uncerts_keys = ["sal_u", "temp_u", *parameters.keys()]
     default_uall_keys = ["sal_defu", "temp_defu", *[k.replace('_u', '_defu') for k in parameters.keys()]]
@@ -324,6 +330,7 @@ def PyESPER_LIR(DesiredVariables, Path, OutputCoordinates={}, PredictorMeasureme
 
     # Create DataFrames
     keys = meas_uncerts_keys
+
     Uncerts = np.column_stack([MeasUncerts[k] for k in keys])
     Uncertainties_pre = pd.DataFrame(Uncerts, columns=keys)
 
@@ -1137,7 +1144,8 @@ def PyESPER_LIR(DesiredVariables, Path, OutputCoordinates={}, PredictorMeasureme
         
     def SimpleCantEstimateLR(EstDates, longitude, latitude, depth):
         # Load interpolation points and values
-        CantIntPoints = pd.read_csv('SimpleCantEstimateLR_full.csv')
+        pyESPER_path = files('PyESPER').joinpath('../')
+        CantIntPoints = pd.read_csv(os.path.join(pyESPER_path,'SimpleCantEstimateLR_full.csv'))
         pointsi = (
             CantIntPoints['Int_long'] * 0.25,
             CantIntPoints['Int_lat'],
