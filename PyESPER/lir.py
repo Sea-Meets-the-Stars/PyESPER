@@ -278,7 +278,8 @@ def PyESPER_LIR(DesiredVariables, Path, OutputCoordinates={}, PredictorMeasureme
                 result = np.array([i * default_factor for i in PredictorMeasurements[param.replace('_u', '')]])
                 dresult = result
             else:
-                result = np.tile('nan', n)
+                #result = np.tile('nan', n)
+                result = np.tile(np.nan, n)
                 dresult = np.tile(0, n)
         return result, dresult
 
@@ -302,7 +303,8 @@ def PyESPER_LIR(DesiredVariables, Path, OutputCoordinates={}, PredictorMeasureme
     sal_defu = np.tile(0.003, n)
 
     # Temperature uncertainties
-    temp_u = np.tile(np.array(MeasUncerts.get("temp_u", [0.003])), n) if "temp_u" in MeasUncerts or "temperature" in PredictorMeasurements else np.tile("nan", n)
+    #temp_u = np.tile(np.array(MeasUncerts.get("temp_u", [0.003])), n) if "temp_u" in MeasUncerts or "temperature" in PredictorMeasurements else np.tile("nan", n)
+    temp_u = np.tile(np.array(MeasUncerts.get("temp_u", [0.003])), n) if "temp_u" in MeasUncerts or "temperature" in PredictorMeasurements else np.tile(np.nan, n)
     temp_defu = np.tile(0.003 if "temp_u" in MeasUncerts or "temperature" in PredictorMeasurements else 0, n)
 
     # Process other parameters
@@ -318,6 +320,7 @@ def PyESPER_LIR(DesiredVariables, Path, OutputCoordinates={}, PredictorMeasureme
             param, factor, PredictorMeasurements, n
         )
 
+    
     # Update MeasUncerts and DefaultUAll dictionaries
     meas_uncerts_keys = ["sal_u", "temp_u", *parameters.keys()]
     default_uall_keys = ["sal_defu", "temp_defu", *[k.replace('_u', '_defu') for k in parameters.keys()]]
@@ -327,6 +330,7 @@ def PyESPER_LIR(DesiredVariables, Path, OutputCoordinates={}, PredictorMeasureme
 
     # Create DataFrames
     keys = meas_uncerts_keys
+
     Uncerts = np.column_stack([MeasUncerts[k] for k in keys])
     Uncertainties_pre = pd.DataFrame(Uncerts, columns=keys)
 
