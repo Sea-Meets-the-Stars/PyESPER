@@ -1,3 +1,19 @@
+    # Importing packages
+import math
+import os
+import time
+from importlib.resources import files
+
+import matplotlib.path as mpltPath
+import numpy as np
+import pandas as pd
+import PyCO2SYS as pyco2
+import scipy.interpolate
+import seawater as sw
+from scipy.interpolate import griddata
+from scipy.io import loadmat
+from scipy.spatial import Delaunay
+
 def PyESPER_LIR(DesiredVariables, Path, OutputCoordinates={}, PredictorMeasurements={}, **kwargs):
     
     """
@@ -180,20 +196,7 @@ def PyESPER_LIR(DesiredVariables, Path, OutputCoordinates={}, PredictorMeasureme
     ************************************************************************* 
     """
 
-     # Importing packages
-    import math
-    import os
-    import time
 
-    import matplotlib.path as mpltPath
-    import numpy as np
-    import pandas as pd
-    import PyCO2SYS as pyco2
-    import scipy.interpolate
-    import seawater as sw
-    from scipy.interpolate import griddata
-    from scipy.io import loadmat
-    from scipy.spatial import Delaunay
 
      # Starting the timer
     tic = time.perf_counter() 
@@ -1137,7 +1140,8 @@ def PyESPER_LIR(DesiredVariables, Path, OutputCoordinates={}, PredictorMeasureme
         
     def SimpleCantEstimateLR(EstDates, longitude, latitude, depth):
         # Load interpolation points and values
-        CantIntPoints = pd.read_csv('SimpleCantEstimateLR_full.csv')
+        pyESPER_path = files('PyESPER').joinpath('../')
+        CantIntPoints = pd.read_csv(os.path.join(pyESPER_path,'SimpleCantEstimateLR_full.csv'))
         pointsi = (
             CantIntPoints['Int_long'] * 0.25,
             CantIntPoints['Int_lat'],
